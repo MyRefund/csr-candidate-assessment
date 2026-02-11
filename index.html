@@ -23,7 +23,6 @@ body{
     no-repeat fixed;
 }
 
-/* HEADER */
 .header{
   background:var(--g0);
   padding:16px 24px;
@@ -49,7 +48,6 @@ body{
   font-weight:900;
 }
 
-/* PAGE */
 .page{
   min-height:calc(100vh - 72px);
   display:flex;
@@ -60,7 +58,6 @@ body{
   width:100%;
 }
 
-/* WIDGET */
 .card{
   background:var(--g0);
   border-radius:18px;
@@ -207,7 +204,7 @@ const questions = [
   {
     id:"q4",
     title:"Empathy & Tone",
-    instructions:"Write a short response (2–4 sentences) that acknowledges how the customer feels and keeps the conversation constructive.",
+    instructions:"Write a short response (2–4 sentences).",
     scenario:"I know this probably isn’t your fault, but this has been incredibly stressful and I’m really disappointed."
   },
   {
@@ -230,7 +227,7 @@ const questions = [
   {
     id:"q6",
     title:"Explaining Things Clearly",
-    instructions:"Write a clear, plain-English explanation suitable for phone, chat, or email (3–5 sentences).",
+    instructions:"Write a clear, plain-English explanation (3–5 sentences).",
     scenario:"Why does it take a few days for a tax refund to be processed after submission?"
   }
 ];
@@ -306,14 +303,20 @@ function next(){
 
     fetch(SUBMIT_URL, {
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
+      mode:"cors",
+      headers:{
+        "Content-Type":"application/json"
+      },
       body:JSON.stringify(data)
     })
-    .then(()=>{
+    .then(res => res.json())
+    .then(response => {
+      console.log("Submission success:", response);
       localStorage.removeItem(storeKey);
       alert("Assessment submitted successfully. Thank you.");
     })
-    .catch(()=>{
+    .catch(error=>{
+      console.error("Submission error:", error);
       alert("Submission failed. Please try again.");
     });
   }
