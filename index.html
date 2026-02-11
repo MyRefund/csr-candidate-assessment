@@ -302,23 +302,20 @@ function next(){
     save();
 
     fetch(SUBMIT_URL, {
-      method:"POST",
-      mode:"cors",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify(data)
-    })
-    .then(res => res.json())
-    .then(response => {
-      console.log("Submission success:", response);
-      localStorage.removeItem(storeKey);
-      alert("Assessment submitted successfully. Thank you.");
-    })
-    .catch(error=>{
-      console.error("Submission error:", error);
-      alert("Submission failed. Please try again.");
-    });
+  method: "POST",
+  body: new URLSearchParams({
+    payload: JSON.stringify(data)
+  })
+})
+.then(() => {
+  localStorage.removeItem(storeKey);
+  alert("Assessment submitted successfully. Thank you.");
+})
+.catch(error => {
+  console.error("Submission error:", error);
+  alert("Submission failed. Please try again.");
+});
+
   }
 }
 
