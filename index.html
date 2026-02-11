@@ -20,6 +20,10 @@ body{
   margin:0;
   font-family:"Okta Neue", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color:var(--text);
+  background:
+    linear-gradient(rgba(255,255,255,0.7), rgba(255,255,255,0.7)),
+    url("My Refund-Hero Images-02 (1).jpg")
+    center center / cover no-repeat fixed;
 }
 
 /* HEADER */
@@ -51,25 +55,21 @@ body{
 
 /* PAGE */
 .page{
-  display:grid;
-  grid-template-columns:1fr 1fr;
   min-height:calc(100vh - 72px);
-  background:#f9fafb;
+  display:flex;
+  align-items:flex-start;
 }
 
 .left{
   padding:48px 56px;
-}
-
-.right{
-  background:url("My Refund-Hero Images-02 (1).jpg") center center / cover no-repeat;
+  width:100%;
 }
 
 .card{
-  background:rgba(255,255,255,.9);
-  backdrop-filter:blur(4px);
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(6px);
   border-radius:16px;
-  padding:24px;
+  padding:28px;
   max-width:640px;
 }
 
@@ -77,12 +77,18 @@ body{
   font-size:13px;
   font-weight:800;
   color:var(--muted);
-  margin-bottom:10px;
+  margin-bottom:8px;
 }
 
 h2{
-  margin:0 0 12px 0;
+  margin:0 0 6px 0;
   color:var(--g0);
+}
+
+.instructions{
+  font-size:14px;
+  color:#374151;
+  margin-bottom:14px;
 }
 
 blockquote{
@@ -107,7 +113,7 @@ textarea{min-height:140px}
 .actions{
   display:flex;
   justify-content:flex-end;
-  margin-top:16px;
+  margin-top:18px;
 }
 
 button{
@@ -115,16 +121,16 @@ button{
   color:#fff;
   border:none;
   border-radius:999px;
-  padding:10px 20px;
+  padding:10px 22px;
   font-weight:900;
   cursor:pointer;
 }
 
 button:hover{background:#0b5c42}
 
-@media(max-width:1000px){
-  .page{grid-template-columns:1fr}
-  .right{display:none}
+@media(max-width:900px){
+  .left{padding:32px 20px}
+  body{background-attachment:scroll}
 }
 </style>
 </head>
@@ -134,7 +140,7 @@ button:hover{background:#0b5c42}
 <div class="header">
   <div class="header-inner">
     <div class="brand">
-      <img src="logo.png">
+      <img src="logo.png" alt="My Refund">
       <div class="brand-text">
         <strong>CSR Candidate Assessment</strong>
       </div>
@@ -143,19 +149,15 @@ button:hover{background:#0b5c42}
 </div>
 
 <div class="page">
-
-<div class="left">
-  <div class="card">
-    <div class="progress" id="progress"></div>
-    <div id="content"></div>
-    <div class="actions">
-      <button onclick="next()">Next</button>
+  <div class="left">
+    <div class="card">
+      <div class="progress" id="progress"></div>
+      <div id="content"></div>
+      <div class="actions">
+        <button onclick="next()">Next</button>
+      </div>
     </div>
   </div>
-</div>
-
-<div class="right"></div>
-
 </div>
 
 <script>
@@ -164,6 +166,7 @@ const answers = JSON.parse(localStorage.getItem("csrAssessment") || "{}");
 const questions = [
   {
     title:"Candidate details",
+    instructions:"Please enter your details so we know who this assessment belongs to.",
     render:()=>`
       <input placeholder="Full name" value="${answers.name||""}" oninput="save('name',this.value)">
       <input placeholder="Email address" value="${answers.email||""}" oninput="save('email',this.value)">
@@ -171,34 +174,40 @@ const questions = [
   },
   {
     title:"Customer Email Response",
+    instructions:"Write a professional and empathetic response. Acknowledge the customer’s frustration, take ownership, and explain next steps clearly.",
     scenario:"This is the third time I’ve contacted you and I still don’t have an answer. I was promised a response last week and now I’m being ignored. If this isn’t sorted today, I’ll be taking this further.",
     key:"q1"
   },
   {
     title:"Prioritisation Scenario",
+    instructions:"List the order you would handle these issues and briefly explain why.",
     scenario:"1. Angry delayed response\n2. Quick 2-minute question\n3. Non-urgent internal request\n4. Possible double charge",
     key:"q2"
   },
   {
     title:"Policy & Compliance – Identity Verification",
+    instructions:"Explain how you would respond while following policy and keeping the process moving.",
     scenario:"I don’t have a passport or driver licence, but I can send my work ID instead.",
     key:"q3"
   },
   {
     title:"Empathy & Tone",
+    instructions:"Write a short response (2–4 sentences) that acknowledges how the customer feels and keeps the conversation constructive.",
     scenario:"I know this probably isn’t your fault, but this has been incredibly stressful and I’m really disappointed.",
     key:"q4"
   },
   {
     title:"Attention to Detail",
+    instructions:"Follow the instructions exactly.",
     render:()=>`
       <input placeholder="READY" value="${answers.ready||""}" oninput="save('ready',this.value)">
       <input placeholder="DD/MM/YYYY" value="${answers.date||""}" oninput="save('date',this.value)">
-      <textarea placeholder="Why does attention to detail matter?" oninput="save('detail',this.value)">${answers.detail||""}</textarea>
+      <textarea placeholder="Why does attention to detail matter in customer service? (one sentence)" oninput="save('detail',this.value)">${answers.detail||""}</textarea>
     `
   },
   {
     title:"Explaining Things Clearly",
+    instructions:"Write a clear, plain-English explanation suitable for phone, chat, or email (3–5 sentences).",
     scenario:"Why does it take a few days for a tax refund to be processed after submission?",
     key:"q6"
   }
@@ -212,18 +221,23 @@ function save(k,v){
 }
 
 function render(){
-  document.getElementById("progress").textContent = `Question ${i+1} of ${questions.length}`;
   const q = questions[i];
-  let html = `<h2>${q.title}</h2>`;
-  if(q.scenario) html+=`<blockquote>${q.scenario}</blockquote>
-    <textarea oninput="save('${q.key}',this.value)">${answers[q.key]||""}</textarea>`;
-  if(q.render) html+=q.render();
+  document.getElementById("progress").textContent = `Question ${i+1} of ${questions.length}`;
+  let html = `<h2>${q.title}</h2>
+              <div class="instructions">${q.instructions}</div>`;
+  if(q.scenario){
+    html += `<blockquote>${q.scenario}</blockquote>
+             <textarea oninput="save('${q.key}',this.value)">${answers[q.key]||""}</textarea>`;
+  }
+  if(q.render) html += q.render();
   document.getElementById("content").innerHTML = html;
 }
 
 function next(){
-  if(i < questions.length-1){ i++; render(); }
-  else{
+  if(i < questions.length-1){
+    i++;
+    render();
+  } else {
     console.log("FINAL ANSWERS:", answers);
     alert("Assessment complete. Thank you.");
   }
