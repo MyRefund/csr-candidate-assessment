@@ -1,131 +1,237 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Refund – CSR Candidate Assessment</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background: #f9fafb;
-      color: #1f2937;
-      margin: 0;
-      padding: 24px;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background: #ffffff;
-      padding: 32px;
-      border-radius: 8px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-    }
-    h1 {
-      color: #094B35;
-      margin-bottom: 8px;
-    }
-    h2 {
-      margin-top: 32px;
-      color: #094B35;
-    }
-    p {
-      line-height: 1.6;
-    }
-    .meta {
-      font-size: 14px;
-      color: #4b5563;
-      margin-bottom: 24px;
-    }
-    blockquote {
-      background: #f3f4f6;
-      padding: 16px;
-      border-left: 4px solid #094B35;
-      margin: 16px 0;
-    }
-    textarea, input[type="text"], input[type="date"] {
-      width: 100%;
-      padding: 12px;
-      margin-top: 8px;
-      margin-bottom: 24px;
-      border-radius: 6px;
-      border: 1px solid #d1d5db;
-      font-family: inherit;
-      font-size: 14px;
-    }
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-    .instructions {
-      background: #ECFDF5;
-      padding: 16px;
-      border-radius: 6px;
-      margin-bottom: 24px;
-    }
-    footer {
-      font-size: 14px;
-      color: #6b7280;
-      margin-top: 40px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Customer Service Representative – Skills Assessment</h1>
-    <p class="meta">
-      Estimated time: 20 minutes<br>
-      Please answer all questions honestly and in your own words.
-    </p>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Refund — CSR Candidate Assessment</title>
 
-    <div class="instructions">
-      This assessment reflects real situations you may handle at My Refund.
-      We’re looking for clear communication, empathy, good judgment, and attention to detail.
+<style>
+:root{
+  --g0:#094B35;
+  --g1:#03953F;
+  --text:#111827;
+  --muted:#6b7280;
+  --radius:16px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Okta Neue", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  background:var(--g0);
+  color:#fff;
+  padding:16px 24px;
+}
+
+.header-inner{
+  max-width:1400px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand img{
+  height:28px;
+}
+
+.brand-text{
+  display:flex;
+  flex-direction:column;
+  line-height:1.15;
+}
+
+.brand-text strong{
+  font-size:16px;
+  font-weight:900;
+}
+
+.brand-text span{
+  font-size:13px;
+  opacity:.9;
+  font-weight:700;
+}
+
+/* ================= PAGE ================= */
+
+.page{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  min-height:calc(100vh - 72px);
+  background:#f9fafb;
+}
+
+/* ================= LEFT ================= */
+
+.left{
+  padding:48px 56px;
+}
+
+.section-title{
+  font-size:18px;
+  font-weight:900;
+  color:var(--g0);
+  margin:28px 0 14px;
+}
+
+.card{
+  background:#fff;
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:24px;
+}
+
+blockquote{
+  background:#f3f4f6;
+  padding:14px 16px;
+  border-left:4px solid var(--g0);
+  margin:14px 0;
+}
+
+textarea,
+input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  margin-bottom:14px;
+  border-radius:10px;
+  border:1px solid #d1d5db;
+  font-family:inherit;
+  font-size:14px;
+}
+
+textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+/* ================= RIGHT ================= */
+
+.right{
+  background:linear-gradient(135deg, var(--g0), var(--g1));
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:1000px){
+  .page{grid-template-columns:1fr}
+  .right{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<div class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <img src="logo.png" alt="My Refund">
+      <div class="brand-text">
+        <strong>CSR Candidate Assessment</strong>
+        <span>Customer Service – My Refund</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= PAGE ================= -->
+<div class="page">
+
+  <!-- LEFT -->
+  <div class="left">
+
+    <!-- Candidate details -->
+    <div class="card">
+      <strong>Candidate details</strong><br><br>
+      <input type="text" placeholder="Full name">
+      <input type="text" placeholder="Email address">
     </div>
 
-    <h2>1. Customer Email Response</h2>
-    <blockquote>
-      “This is the third time I’ve contacted you and I still don’t have an answer.
-      I was promised a response last week and now I’m being ignored.
-      If this isn’t sorted today, I’ll be taking this further.”
-    </blockquote>
-    <textarea placeholder="Write your response here..."></textarea>
+    <!-- Intro -->
+    <div class="card">
+      <strong>Estimated time:</strong> 20 minutes<br>
+      Please answer all questions honestly and in your own words.
+    </div>
 
-    <h2>2. Prioritisation Scenario</h2>
-    <p>You start your day and see the following:</p>
-    <ol>
-      <li>A customer is upset about a delayed response and is threatening to escalate.</li>
-      <li>A customer has a quick question that would take around two minutes to answer.</li>
-      <li>An internal team member asks for help with a non-urgent task.</li>
-      <li>A customer reports they may have been charged twice.</li>
-    </ol>
-    <textarea placeholder="List the order and explain why..."></textarea>
+    <!-- Q1 -->
+    <div class="section-title">1. Customer Email Response</div>
+    <div class="card">
+      <blockquote>
+        This is the third time I’ve contacted you and I still don’t have an answer.
+        I was promised a response last week and now I’m being ignored.
+        If this isn’t sorted today, I’ll be taking this further.
+      </blockquote>
+      <textarea placeholder="Write your response here..."></textarea>
+    </div>
 
-    <h2>3. Policy & Compliance – Identity Verification</h2>
-    <blockquote>
-      “I don’t have a passport or driver licence, but I can send you my work ID instead.
-      I’ve used this for other things before and it should be fine.”
-    </blockquote>
-    <textarea placeholder="Explain how you would respond and move the process forward..."></textarea>
+    <!-- Q2 -->
+    <div class="section-title">2. Prioritisation Scenario</div>
+    <div class="card">
+      <ol>
+        <li>A customer is upset about a delayed response and is threatening to escalate.</li>
+        <li>A customer has a quick question that would take around two minutes to answer.</li>
+        <li>An internal team member asks for help with a non-urgent task.</li>
+        <li>A customer reports they may have been charged twice.</li>
+      </ol>
+      <textarea placeholder="List the order and explain your reasoning..."></textarea>
+    </div>
 
-    <h2>4. Empathy & Tone</h2>
-    <blockquote>
-      “I know this probably isn’t your fault, but this whole process has been incredibly stressful and I’m really disappointed.”
-    </blockquote>
-    <textarea placeholder="Write a short response (2–4 sentences)..."></textarea>
+    <!-- Q3 -->
+    <div class="section-title">3. Policy & Compliance – Identity Verification</div>
+    <div class="card">
+      <blockquote>
+        I don’t have a passport or driver licence, but I can send you my work ID instead.
+        I’ve used this for other things before and it should be fine.
+      </blockquote>
+      <textarea placeholder="Explain how you would respond and move the process forward..."></textarea>
+    </div>
 
-    <h2>5. Attention to Detail</h2>
-    <label>Write the word READY</label>
-    <input type="text" placeholder="READY">
+    <!-- Q4 -->
+    <div class="section-title">4. Empathy & Tone</div>
+    <div class="card">
+      <blockquote>
+        I know this probably isn’t your fault, but this whole process has been incredibly stressful and I’m really disappointed.
+      </blockquote>
+      <textarea placeholder="Write a short response (2–4 sentences)..."></textarea>
+    </div>
 
-    <label>Today’s date (DD/MM/YYYY)</label>
-    <input type="text" placeholder="DD/MM/YYYY">
+    <!-- Q5 -->
+    <div class="section-title">5. Attention to Detail</div>
+    <div class="card">
+      <input placeholder="READY">
+      <input placeholder="DD/MM/YYYY">
+      <textarea placeholder="Why does attention to detail matter in customer service? (one sentence)"></textarea>
+    </div>
 
-    <label>Why does attention to detail matter in customer service?</label>
-    <textarea placeholder="One sentence..."></textarea>
+    <!-- Q6 -->
+    <div class="section-title">6. Explaining Things Clearly</div>
+    <div class="card">
+      <blockquote>
+        A customer asks: “Why does it take a few days for my tax refund to be processed after I submit my information?”
+      </blockquote>
+      <textarea placeholder="Write a clear, plain-English explanation (3–5 sentences)..."></textarea>
+    </div>
 
-    <footer>
-      Thank you for your time. Please follow the submission instructions provided by the hiring team.
-    </footer>
   </div>
+
+  <!-- RIGHT -->
+  <div class="right"></div>
+
+</div>
+
 </body>
 </html>
