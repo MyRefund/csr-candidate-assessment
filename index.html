@@ -309,8 +309,19 @@ function next(){
       (new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
     );
     save();
-    console.log("FINAL SUBMISSION:", data);
-    alert("Assessment complete. Thank you.");
+   fetch("https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(data)
+})
+.then(() => {
+  localStorage.removeItem("myrefund_csr_assessment");
+  alert("Assessment submitted successfully. Thank you.");
+})
+.catch(() => {
+  alert("There was an error submitting your assessment. Please try again.");
+});
+
   }
 }
 
