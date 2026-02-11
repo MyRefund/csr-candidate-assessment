@@ -8,7 +8,6 @@
 <style>
 :root{
   --g0:#094B35;
-  --g1:#03953F;
   --radius:16px;
 }
 
@@ -24,8 +23,7 @@ body{
     no-repeat fixed;
 }
 
-/* ================= HEADER ================= */
-
+/* HEADER */
 .header{
   background:var(--g0);
   padding:16px 24px;
@@ -51,8 +49,7 @@ body{
   font-weight:900;
 }
 
-/* ================= PAGE ================= */
-
+/* PAGE */
 .page{
   min-height:calc(100vh - 72px);
   display:flex;
@@ -63,13 +60,12 @@ body{
   width:100%;
 }
 
-/* ================= WIDGET ================= */
-
+/* WIDGET */
 .card{
   background:var(--g0);
   border-radius:18px;
   padding:28px;
-  max-width:700px;
+  max-width:720px;
   box-shadow:0 20px 40px rgba(0,0,0,.35);
 }
 
@@ -165,7 +161,9 @@ button:hover{opacity:.9}
 </div>
 
 <script>
+const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec";
 const storeKey = "myrefund_csr_assessment";
+
 const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
 
 data.answers = data.answers || {};
@@ -221,14 +219,10 @@ const questions = [
         IRD number: <strong>123-456-789</strong><br>
         Bank account: <strong>12-3456-0789012-00</strong>
       </blockquote>
-
-      <input
-        placeholder="Re-enter IRD number exactly as shown"
+      <input placeholder="Re-enter IRD number exactly as shown"
         value="${data.answers.q5_ird||""}"
         oninput="saveAnswer('q5_ird',this.value)">
-
-      <input
-        placeholder="Re-enter bank account number exactly as shown"
+      <input placeholder="Re-enter bank account number exactly as shown"
         value="${data.answers.q5_bank||""}"
         oninput="saveAnswer('q5_bank',this.value)">
     `
@@ -309,19 +303,19 @@ function next(){
       (new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
     );
     save();
-   fetch("https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(data)
-})
-.then(() => {
-  localStorage.removeItem("myrefund_csr_assessment");
-  alert("Assessment submitted successfully. Thank you.");
-})
-.catch(() => {
-  alert("There was an error submitting your assessment. Please try again.");
-});
 
+    fetch(SUBMIT_URL, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify(data)
+    })
+    .then(()=>{
+      localStorage.removeItem(storeKey);
+      alert("Assessment submitted successfully. Thank you.");
+    })
+    .catch(()=>{
+      alert("Submission failed. Please try again.");
+    });
   }
 }
 
