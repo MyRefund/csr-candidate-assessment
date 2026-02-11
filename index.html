@@ -1,45 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Refund — CSR Candidate Assessment</title>
+
+<style>
+:root{
+  --g0:#094B35;
+  --g1:#03953F;
+  --text:#111827;
+  --radius:16px;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:"Okta Neue", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:#fff;
+  background:
+    url("My Refund-Hero Images-02 (1).jpg")
+    center center / cover
+    no-repeat fixed;
+}
+
+/* ================= HEADER ================= */
+
+.header{
+  background:var(--g0);
+  padding:16px 24px;
+}
+
+.header-inner{
+  max-width:1400px;
+  margin:0 auto;
+  display:flex;
+  align-items:center;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand img{height:28px}
+
+.brand-text strong{
+  font-size:16px;
+  font-weight:900;
+}
+
+/* ================= PAGE ================= */
+
+.page{
+  min-height:calc(100vh - 72px);
+  display:flex;
+  align-items:flex-start;
+}
+
+.left{
+  padding:56px;
+  width:100%;
+}
+
+/* ================= WIDGET ================= */
+
+.card{
+  background:var(--g0);
+  border-radius:18px;
+  padding:28px;
+  max-width:680px;
+  box-shadow:0 20px 40px rgba(0,0,0,.35);
+}
+
+.progress{
+  font-size:13px;
+  font-weight:800;
+  opacity:.9;
+  margin-bottom:10px;
+}
+
+h2{
+  margin:0 0 6px 0;
+  font-weight:900;
+}
+
+.instructions{
+  font-size:14px;
+  opacity:.95;
+  margin-bottom:14px;
+}
+
+blockquote{
+  background:rgba(255,255,255,.1);
+  padding:14px 16px;
+  border-left:4px solid #fff;
+  margin:14px 0;
+  font-size:14px;
+}
+
+textarea,input{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+  font-family:inherit;
+  font-size:14px;
+}
+
+textarea{
+  min-height:140px;
+  resize:vertical;
+}
+
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:18px;
+}
+
+button{
+  background:#fff;
+  color:var(--g0);
+  border:none;
+  border-radius:999px;
+  padding:10px 24px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+button:hover{opacity:.9}
+
+@media(max-width:900px){
+  .left{padding:32px 20px}
+  body{background-attachment:scroll}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <img src="logo.png" alt="My Refund">
+      <div class="brand-text">
+        <strong>CSR Candidate Assessment</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="left">
+    <div class="card">
+      <div class="progress" id="progress"></div>
+      <div id="content"></div>
+      <div class="actions">
+        <button onclick="next()">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-const storeKey = "csrAssessmentTimed";
+const storeKey = "myrefund_csr_assessment";
 const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
 
 data.answers = data.answers || {};
 data.timing = data.timing || {
-  startedAt: null,
-  submittedAt: null,
-  perQuestion: {},
-  totalSeconds: 0
+  startedAt:null,
+  submittedAt:null,
+  totalSeconds:0,
+  perQuestion:{}
 };
 
-let currentQuestionStart = null;
+let currentStart = null;
 
 const questions = [
-  { id:"details", title:"Candidate details", instructions:"Please enter your details.",
+  {
+    id:"details",
+    title:"Candidate details",
+    instructions:"Please enter your details so we know who this assessment belongs to.",
     render:()=>`
       <input placeholder="Full name" value="${data.name||""}" oninput="saveField('name',this.value)">
       <input placeholder="Email address" value="${data.email||""}" oninput="saveField('email',this.value)">
     `
   },
-  { id:"q1", title:"Customer Email Response", instructions:"Write a professional and empathetic response.",
+  {
+    id:"q1",
+    title:"Customer Email Response",
+    instructions:"Write a professional and empathetic response. Acknowledge the frustration, take ownership, and explain next steps clearly.",
     scenario:"This is the third time I’ve contacted you and I still don’t have an answer. I was promised a response last week and now I’m being ignored. If this isn’t sorted today, I’ll be taking this further."
   },
-  { id:"q2", title:"Prioritisation Scenario", instructions:"List the order you would handle these and explain why.",
+  {
+    id:"q2",
+    title:"Prioritisation Scenario",
+    instructions:"List the order you would handle these issues and briefly explain why.",
     scenario:"1. Angry delayed response\n2. Quick 2-minute question\n3. Non-urgent internal request\n4. Possible double charge"
   },
-  { id:"q3", title:"Policy & Compliance – Identity Verification", instructions:"Explain how you would respond while following policy.",
+  {
+    id:"q3",
+    title:"Policy & Compliance – Identity Verification",
+    instructions:"Explain how you would respond while following policy and keeping the process moving.",
     scenario:"I don’t have a passport or driver licence, but I can send my work ID instead."
   },
-  { id:"q4", title:"Empathy & Tone", instructions:"Write a short response (2–4 sentences).",
+  {
+    id:"q4",
+    title:"Empathy & Tone",
+    instructions:"Write a short response (2–4 sentences) that acknowledges how the customer feels and keeps the conversation constructive.",
     scenario:"I know this probably isn’t your fault, but this has been incredibly stressful and I’m really disappointed."
   },
-  { id:"q5", title:"Attention to Detail", instructions:"Follow the instructions exactly.",
+  {
+    id:"q5",
+    title:"Attention to Detail",
+    instructions:"Follow the instructions exactly.",
     render:()=>`
       <input placeholder="READY" value="${data.answers.q5_ready||""}" oninput="saveAnswer('q5_ready',this.value)">
       <input placeholder="DD/MM/YYYY" value="${data.answers.q5_date||""}" oninput="saveAnswer('q5_date',this.value)">
-      <textarea placeholder="Why does attention to detail matter? (one sentence)"
+      <textarea placeholder="Why does attention to detail matter in customer service? (one sentence)"
         oninput="saveAnswer('q5_reason',this.value)">${data.answers.q5_reason||""}</textarea>
     `
   },
-  { id:"q6", title:"Explaining Things Clearly", instructions:"Write a plain-English explanation (3–5 sentences).",
+  {
+    id:"q6",
+    title:"Explaining Things Clearly",
+    instructions:"Write a clear, plain-English explanation suitable for phone, chat, or email (3–5 sentences).",
     scenario:"Why does it take a few days for a tax refund to be processed after submission?"
   }
 ];
@@ -50,28 +239,27 @@ function save(){
   localStorage.setItem(storeKey, JSON.stringify(data));
 }
 
-function saveField(key,val){
-  data[key]=val;
+function saveField(k,v){
+  data[k]=v;
   save();
 }
 
-function saveAnswer(key,val){
-  data.answers[key]=val;
+function saveAnswer(k,v){
+  data.answers[k]=v;
   save();
 }
 
-function startTiming(){
+function startTimer(){
   if(!data.timing.startedAt){
     data.timing.startedAt = new Date().toISOString();
   }
-  currentQuestionStart = Date.now();
+  currentStart = Date.now();
 }
 
-function endTiming(questionId){
-  if(!currentQuestionStart) return;
-  const seconds = Math.round((Date.now() - currentQuestionStart)/1000);
-  data.timing.perQuestion[questionId] =
-    (data.timing.perQuestion[questionId] || 0) + seconds;
+function endTimer(id){
+  if(!currentStart) return;
+  const sec = Math.round((Date.now()-currentStart)/1000);
+  data.timing.perQuestion[id] = (data.timing.perQuestion[id]||0)+sec;
   save();
 }
 
@@ -80,28 +268,26 @@ function render(){
   document.getElementById("progress").textContent =
     `Question ${i+1} of ${questions.length}`;
 
-  let html = `<h2>${q.title}</h2><div class="instructions">${q.instructions}</div>`;
+  let html = `<h2>${q.title}</h2>
+              <div class="instructions">${q.instructions}</div>`;
 
   if(q.scenario){
     html += `<blockquote>${q.scenario}</blockquote>
-      <textarea oninput="saveAnswer('${q.id}',this.value)">
-        ${data.answers[q.id]||""}
-      </textarea>`;
+             <textarea oninput="saveAnswer('${q.id}',this.value)">
+             ${data.answers[q.id]||""}</textarea>`;
   }
-
   if(q.render) html += q.render();
-
   document.getElementById("content").innerHTML = html;
-  currentQuestionStart = Date.now();
+  currentStart = Date.now();
 }
 
 function next(){
   const q = questions[i];
 
-  if(i === 0){
-    startTiming(); // start assessment timer AFTER details
+  if(i===0){
+    startTimer();
   } else {
-    endTiming(q.id);
+    endTimer(q.id);
   }
 
   if(i < questions.length-1){
@@ -110,7 +296,7 @@ function next(){
   } else {
     data.timing.submittedAt = new Date().toISOString();
     data.timing.totalSeconds = Math.round(
-      (new Date(data.timing.submittedAt) - new Date(data.timing.startedAt)) / 1000
+      (new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
     );
     save();
     console.log("FINAL SUBMISSION:", data);
@@ -120,3 +306,6 @@ function next(){
 
 render();
 </script>
+
+</body>
+</html>
