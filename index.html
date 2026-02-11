@@ -9,7 +9,6 @@
 :root{
   --g0:#094B35;
   --g1:#03953F;
-  --text:#111827;
   --radius:16px;
 }
 
@@ -57,7 +56,6 @@ body{
 .page{
   min-height:calc(100vh - 72px);
   display:flex;
-  align-items:flex-start;
 }
 
 .left{
@@ -71,7 +69,7 @@ body{
   background:var(--g0);
   border-radius:18px;
   padding:28px;
-  max-width:680px;
+  max-width:700px;
   box-shadow:0 20px 40px rgba(0,0,0,.35);
 }
 
@@ -127,7 +125,7 @@ button{
   color:var(--g0);
   border:none;
   border-radius:999px;
-  padding:10px 24px;
+  padding:10px 26px;
   font-weight:900;
   cursor:pointer;
 }
@@ -217,12 +215,22 @@ const questions = [
   {
     id:"q5",
     title:"Attention to Detail",
-    instructions:"Follow the instructions exactly.",
+    instructions:"Accuracy is important when working with customer tax information. Please copy the details below exactly as shown.",
     render:()=>`
-      <input placeholder="READY" value="${data.answers.q5_ready||""}" oninput="saveAnswer('q5_ready',this.value)">
-      <input placeholder="DD/MM/YYYY" value="${data.answers.q5_date||""}" oninput="saveAnswer('q5_date',this.value)">
-      <textarea placeholder="Why does attention to detail matter in customer service? (one sentence)"
-        oninput="saveAnswer('q5_reason',this.value)">${data.answers.q5_reason||""}</textarea>
+      <blockquote>
+        IRD number: <strong>123-456-789</strong><br>
+        Bank account: <strong>12-3456-0789012-00</strong>
+      </blockquote>
+
+      <input
+        placeholder="Re-enter IRD number exactly as shown"
+        value="${data.answers.q5_ird||""}"
+        oninput="saveAnswer('q5_ird',this.value)">
+
+      <input
+        placeholder="Re-enter bank account number exactly as shown"
+        value="${data.answers.q5_bank||""}"
+        oninput="saveAnswer('q5_bank',this.value)">
     `
   },
   {
@@ -259,7 +267,8 @@ function startTimer(){
 function endTimer(id){
   if(!currentStart) return;
   const sec = Math.round((Date.now()-currentStart)/1000);
-  data.timing.perQuestion[id] = (data.timing.perQuestion[id]||0)+sec;
+  data.timing.perQuestion[id] =
+    (data.timing.perQuestion[id]||0) + sec;
   save();
 }
 
@@ -276,6 +285,7 @@ function render(){
              <textarea oninput="saveAnswer('${q.id}',this.value)">
              ${data.answers[q.id]||""}</textarea>`;
   }
+
   if(q.render) html += q.render();
   document.getElementById("content").innerHTML = html;
   currentStart = Date.now();
