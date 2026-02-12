@@ -35,10 +35,14 @@ body{
 }
 
 .progress{ font-size:13px; font-weight:800; margin-bottom:12px; }
-
 h2{ margin:0 0 10px 0; font-weight:900; }
 
-.instructions{ font-size:14px; margin-bottom:14px; line-height:1.45; white-space:pre-line; }
+.instructions{
+  font-size:14px;
+  margin-bottom:14px;
+  line-height:1.45;
+  white-space:pre-line;
+}
 
 blockquote{
   background:rgba(255,255,255,.1);
@@ -78,7 +82,11 @@ textarea{ min-height:120px; }
 
 .choice input{ width:auto; }
 
-.actions{ display:flex; justify-content:flex-end; margin-top:20px; }
+.actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:20px;
+}
 
 button{
   background:#fff;
@@ -88,6 +96,42 @@ button{
   padding:10px 26px;
   font-weight:900;
   cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+
+button:disabled{
+  opacity:0.7;
+  cursor:not-allowed;
+}
+
+.spinner{
+  width:16px;
+  height:16px;
+  border:3px solid rgba(9,75,53,.2);
+  border-top:3px solid var(--g0);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+
+@keyframes spin{
+  to{ transform:rotate(360deg); }
+}
+
+.success-screen{
+  text-align:center;
+  padding:40px 20px;
+}
+
+.success-screen h2{
+  font-size:22px;
+  margin-bottom:12px;
+}
+
+.success-screen p{
+  font-size:15px;
+  opacity:0.95;
 }
 
 @media(max-width:900px){
@@ -112,7 +156,7 @@ button{
 
 <div class="page">
   <div class="left">
-    <div class="card">
+    <div class="card" id="card">
       <div class="progress" id="progress"></div>
       <div id="content"></div>
       <div class="actions">
@@ -124,15 +168,16 @@ button{
 
 <script>
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec";
-const storeKey = "csr_assessment_final_v1";
+const storeKey = "csr_assessment_junior_v2";
 
 const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
-
 data.testType = "CSR Assessment";
 data.answers = data.answers || {};
 data.timing  = data.timing  || { startedAt:null, submittedAt:null, totalSeconds:0, perQuestion:{} };
 
 let currentStart = null;
+let isSubmitting = false;
+let i = 0;
 
 const questions = [
 
@@ -148,112 +193,23 @@ render:()=>`
 
 {
 id:"s1",
-title:"Section 1: Customer Escalation",
-instructions:"Write a professional response.",
+title:"Section 1: Handling an Upset Customer",
+instructions:`Write a professional response.
+
+• Acknowledge frustration  
+• Take ownership  
+• Explain next steps`,
 render:()=>`
 <blockquote>
-“This is the third time I’ve contacted you. I was promised a response and nothing has happened. If this isn’t sorted today, I’ll be making a complaint.”
+This is the third time I’ve contacted you and I still don’t have an answer.
+
+I’m starting to feel like nobody is taking this seriously.
 </blockquote>
-<textarea oninput="saveAnswer('escalation_response',this.value)">${escapeText(data.answers.escalation_response||"")}</textarea>
-`
-},
-
-{
-id:"s2",
-title:"Section 2: Prioritisation & Judgement",
-instructions:"Assign each task a ranking from 1 (highest priority) to 4 (lowest). Each rank should be used once.",
-render:()=>`
-${rankTask("task1","Customer believes they were charged twice.")}
-${rankTask("task2","Customer upset about waiting 48 hours for a reply.")}
-${rankTask("task3","New customer asking how the process works.")}
-${rankTask("task4","Colleague asking for non-urgent internal help.")}
-
-<label>Briefly explain your reasoning:</label>
-<textarea oninput="saveAnswer('priority_explanation',this.value)">${escapeText(data.answers.priority_explanation||"")}</textarea>
-`
-},
-
-{
-id:"s3",
-title:"Section 3: Handling Required Information",
-instructions:"Select the most appropriate first step, then write your response.",
-render:()=>`
-<div class="choice-group">
-${radio("info_step","Refuse and restate policy")}
-${radio("info_step","Acknowledge concern and explain why information is required")}
-${radio("info_step","Escalate to manager")}
-${radio("info_step","Close the request")}
-</div>
-
-<label>Write your professional response:</label>
-<textarea oninput="saveAnswer('info_response',this.value)">${escapeText(data.answers.info_response||"")}</textarea>
-`
-},
-
-{
-id:"s4",
-title:"Section 4: Managing Expectations & Explaining Delays",
-instructions:`Write a clear and professional response.
-
-Your response should:
-• Acknowledge the customer’s concern  
-• Explain why the request may not be completed immediately  
-• Set realistic expectations  
-• Avoid guaranteeing timeframes  
-• Maintain a calm and confident tone`,
-render:()=>`
-<blockquote>
-Hi,
-
-I uploaded all my documents yesterday and I was expecting this to be finished by now.
-
-Can you please explain what is taking so long?
-</blockquote>
-
-<textarea oninput="saveAnswer('delay_response',this.value)">${escapeText(data.answers.delay_response||"")}</textarea>
-`
-},
-
-{
-id:"s6",
-title:"Section 6: Responding When the Customer Is Incorrect",
-instructions:`Select the most appropriate tone, then write your response.
-
-Your response should:
-• Acknowledge the customer’s concern  
-• Clearly explain why the outcome occurred  
-• Avoid blaming the customer  
-• Avoid being defensive  
-• Maintain confidence in the calculation  
-• Offer to clarify further if needed`,
-render:()=>`
-<blockquote>
-Hi,
-
-I just received my tax outcome and it says I have to pay $186.
-
-That can’t be right. I always get a refund every year.
-
-You must have made a mistake — please fix this.
-</blockquote>
-
-<div class="choice-group">
-${radio("tone","Defensive")}
-${radio("tone","Neutral and factual")}
-${radio("tone","Apologise and adjust the result")}
-${radio("tone","Escalate immediately")}
-</div>
-
-<label>Write your professional response:</label>
-<textarea oninput="saveAnswer('incorrect_response',this.value)">
-${escapeText(data.answers.incorrect_response||"")}
-</textarea>
+<textarea oninput="saveAnswer('upset_customer_response',this.value)">${escapeText(data.answers.upset_customer_response||"")}</textarea>
 `
 }
 
 ];
-
-let i = 0;
 
 function save(){ localStorage.setItem(storeKey, JSON.stringify(data)); }
 function saveField(k,v){ data[k]=v; save(); }
@@ -264,27 +220,6 @@ return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;
 }
 function escapeText(s){
 return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-function rankTask(key,label){
-const selected=data.answers[key]||"";
-return `
-<label>${escapeText(label)}</label>
-<select onchange="saveAnswer('${key}',this.value)">
-<option value="">Select rank</option>
-<option ${selected==="1"?"selected":""} value="1">1 (Highest)</option>
-<option ${selected==="2"?"selected":""} value="2">2</option>
-<option ${selected==="3"?"selected":""} value="3">3</option>
-<option ${selected==="4"?"selected":""} value="4">4 (Lowest)</option>
-</select>`;
-}
-
-function radio(key,label){
-const checked=data.answers[key]===label?"checked":"";
-return `<div class="choice">
-<input type="radio" name="${key}" ${checked} onclick="saveAnswer('${key}','${label}')">
-<div>${label}</div>
-</div>`;
 }
 
 function startTimer(){
@@ -310,15 +245,34 @@ ${q.render()}`;
 currentStart=Date.now();
 }
 
+function showSuccess(){
+document.getElementById("card").innerHTML=`
+<div class="success-screen">
+<h2>Assessment Submitted ✓</h2>
+<p>Thank you for completing the assessment.</p>
+<p>We will be in touch if your application progresses to the next stage.</p>
+</div>
+`;
+}
+
 function next(){
+const btn=document.getElementById("nextBtn");
 const q=questions[i];
+
+if(isSubmitting) return;
 
 if(i===0){ startTimer(); }
 else{ endTimer(q.id); }
 
 if(i<questions.length-1){
 i++; render();
-}else{
+return;
+}
+
+isSubmitting=true;
+btn.disabled=true;
+btn.innerHTML=`<div class="spinner"></div> Submitting...`;
+
 data.timing.submittedAt=new Date().toISOString();
 data.timing.totalSeconds=Math.round(
 (new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
@@ -329,12 +283,17 @@ fetch(SUBMIT_URL,{
 method:"POST",
 body:new URLSearchParams({payload:JSON.stringify(data)})
 })
+.then(res=>res.json())
 .then(()=>{
 localStorage.removeItem(storeKey);
-alert("Assessment submitted successfully.");
+showSuccess();
 })
-.catch(()=>alert("Submission failed."));
-}
+.catch(()=>{
+isSubmitting=false;
+btn.disabled=false;
+btn.textContent="Submit";
+alert("Submission failed. Please try again.");
+});
 }
 
 render();
