@@ -7,7 +7,6 @@
 
 <style>
 :root{ --g0:#094B35; }
-
 *{box-sizing:border-box}
 
 body{
@@ -79,7 +78,6 @@ textarea{ min-height:120px; }
   gap:10px;
   margin:6px 0;
 }
-
 .choice input{ width:auto; }
 
 .actions{
@@ -100,38 +98,41 @@ button{
   align-items:center;
   gap:8px;
 }
-
-button:disabled{
-  opacity:0.7;
-  cursor:not-allowed;
-}
+button:disabled{ opacity:0.75; cursor:not-allowed; }
 
 .spinner{
   width:16px;
   height:16px;
-  border:3px solid rgba(9,75,53,.2);
+  border:3px solid rgba(9,75,53,.22);
   border-top:3px solid var(--g0);
   border-radius:50%;
   animation:spin 0.8s linear infinite;
 }
 
-@keyframes spin{
-  to{ transform:rotate(360deg); }
-}
+@keyframes spin{ to{ transform:rotate(360deg); } }
 
 .success-screen{
   text-align:center;
   padding:40px 20px;
 }
-
 .success-screen h2{
   font-size:22px;
   margin-bottom:12px;
 }
-
 .success-screen p{
   font-size:15px;
   opacity:0.95;
+  margin:6px 0;
+}
+
+.error-banner{
+  display:none;
+  margin-top:12px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:rgba(255,255,255,.14);
+  font-size:13px;
+  line-height:1.35;
 }
 
 @media(max-width:900px){
@@ -159,6 +160,9 @@ button:disabled{
     <div class="card" id="card">
       <div class="progress" id="progress"></div>
       <div id="content"></div>
+
+      <div id="errorBanner" class="error-banner"></div>
+
       <div class="actions">
         <button id="nextBtn" onclick="next()">Next</button>
       </div>
@@ -168,7 +172,7 @@ button:disabled{
 
 <script>
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec";
-const storeKey = "csr_assessment_junior_v2";
+const storeKey = "csr_assessment_junior_v3";
 
 const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
 data.testType = "CSR Assessment";
@@ -180,120 +184,313 @@ let isSubmitting = false;
 let i = 0;
 
 const questions = [
+  {
+    id:"details",
+    title:"Candidate Details",
+    instructions:"Enter your full name and email address.",
+    render:()=>`
+      <input placeholder="Full name" value="${escapeAttr(data.name||"")}" oninput="saveField('name',this.value)">
+      <input placeholder="Email address" value="${escapeAttr(data.email||"")}" oninput="saveField('email',this.value)">
+    `
+  },
 
-{
-id:"details",
-title:"Candidate Details",
-instructions:"Enter your full name and email address.",
-render:()=>`
-<input placeholder="Full name" value="${escapeAttr(data.name||"")}" oninput="saveField('name',this.value)">
-<input placeholder="Email address" value="${escapeAttr(data.email||"")}" oninput="saveField('email',this.value)">
-`
-},
+  {
+    id:"s1",
+    title:"Section 1: Handling an Upset Customer",
+    instructions:`Write a professional response.
 
-{
-id:"s1",
-title:"Section 1: Handling an Upset Customer",
-instructions:`Write a professional response.
-
-• Acknowledge frustration  
-• Take ownership  
-• Explain next steps`,
-render:()=>`
-<blockquote>
+Your response should:
+• Acknowledge their frustration  
+• Take ownership (without blaming anyone)  
+• Explain what you will do next  
+• Keep the tone calm and professional`,
+    render:()=>`
+      <blockquote>
 This is the third time I’ve contacted you and I still don’t have an answer.
 
 I’m starting to feel like nobody is taking this seriously.
-</blockquote>
-<textarea oninput="saveAnswer('upset_customer_response',this.value)">${escapeText(data.answers.upset_customer_response||"")}</textarea>
-`
-}
+      </blockquote>
+      <textarea oninput="saveAnswer('upset_customer_response',this.value)">${escapeText(data.answers.upset_customer_response||"")}</textarea>
+    `
+  },
 
+  {
+    id:"s2",
+    title:"Section 2: Prioritisation Under Pressure",
+    instructions:`Assign each task a ranking from 1 (highest priority) to 4 (lowest). Each rank should be used once.
+
+Then briefly explain your reasoning.`,
+    render:()=>`
+      ${rankTask("prio_task1","A customer says they were charged incorrectly.")}
+      ${rankTask("prio_task2","A customer is upset about waiting two days for a reply.")}
+      ${rankTask("prio_task3","A new customer is asking how the service works.")}
+      ${rankTask("prio_task4","A colleague asks for help with a non-urgent internal task.")}
+
+      <label>Briefly explain your reasoning:</label>
+      <textarea oninput="saveAnswer('priority_explanation',this.value)">${escapeText(data.answers.priority_explanation||"")}</textarea>
+    `
+  },
+
+  {
+    id:"s3",
+    title:"Section 3: Explaining Why More Information Is Needed",
+    instructions:`Write a response that:
+• Acknowledges the customer’s concern  
+• Explains why additional information is required to continue  
+• Reassures them in a professional way  
+• Encourages them to continue`,
+    render:()=>`
+      <blockquote>
+I don’t understand why you need this extra information.
+
+I’ve already explained my situation.
+
+Can’t you just continue without asking for more details?
+      </blockquote>
+      <textarea oninput="saveAnswer('info_required_response',this.value)">${escapeText(data.answers.info_required_response||"")}</textarea>
+    `
+  },
+
+  {
+    id:"s4",
+    title:"Section 4: Managing Expectations",
+    instructions:`Write a response that:
+• Acknowledges the customer’s concern  
+• Explains that requests need to be reviewed before completion  
+• Sets realistic expectations  
+• Avoids guaranteeing an exact timeframe`,
+    render:()=>`
+      <blockquote>
+I sent everything yesterday.
+
+Why isn’t this finished yet?
+      </blockquote>
+      <textarea oninput="saveAnswer('expectations_response',this.value)">${escapeText(data.answers.expectations_response||"")}</textarea>
+    `
+  },
+
+  {
+    id:"s5",
+    title:"Section 5: Attention to Detail",
+    instructions:`1) Identify the inconsistency in the message below.\n2) Explain what you would check before responding.`,
+    render:()=>`
+      <blockquote>
+I was charged $120, but my receipt says $102.
+
+Please refund the difference of $12.
+      </blockquote>
+
+      <label>1) What is the inconsistency?</label>
+      <textarea oninput="saveAnswer('inconsistency',this.value)">${escapeText(data.answers.inconsistency||"")}</textarea>
+
+      <label>2) What would you check before responding?</label>
+      <textarea oninput="saveAnswer('detail_action',this.value)">${escapeText(data.answers.detail_action||"")}</textarea>
+    `
+  },
+
+  {
+    id:"s6",
+    title:"Section 6: Correcting a Misunderstanding",
+    instructions:`Select the most appropriate tone, then write your response.
+
+Your response should:
+• Acknowledge their concern  
+• Correct the misunderstanding clearly  
+• Avoid being defensive  
+• Explain what you can do next`,
+    render:()=>`
+      <blockquote>
+I’ve reviewed the outcome and I don’t agree with it.
+
+There must be a mistake. Please fix this.
+      </blockquote>
+
+      <div class="choice-group">
+        ${radio("tone","Defensive")}
+        ${radio("tone","Neutral and factual")}
+        ${radio("tone","Apologise and change the outcome")}
+        ${radio("tone","Escalate immediately")}
+      </div>
+
+      <label>Write your professional response:</label>
+      <textarea oninput="saveAnswer('misunderstanding_response',this.value)">${escapeText(data.answers.misunderstanding_response||"")}</textarea>
+    `
+  }
 ];
 
+// ---------------- storage ----------------
 function save(){ localStorage.setItem(storeKey, JSON.stringify(data)); }
 function saveField(k,v){ data[k]=v; save(); }
 function saveAnswer(k,v){ data.answers[k]=v; save(); }
 
+// ---------------- escaping ----------------
 function escapeAttr(s){
-return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/"/g,"&quot;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
 }
 function escapeText(s){
-return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
 }
 
-function startTimer(){
-if(!data.timing.startedAt) data.timing.startedAt=new Date().toISOString();
-currentStart=Date.now();
+// ---------------- UI helpers ----------------
+function rankTask(key,label){
+  const selected = data.answers[key] || "";
+  return `
+    <label>${escapeText(label)}</label>
+    <select onchange="saveAnswer('${key}',this.value)">
+      <option value="">Select rank</option>
+      <option ${selected==="1"?"selected":""} value="1">1 (Highest)</option>
+      <option ${selected==="2"?"selected":""} value="2">2</option>
+      <option ${selected==="3"?"selected":""} value="3">3</option>
+      <option ${selected==="4"?"selected":""} value="4">4 (Lowest)</option>
+    </select>
+  `;
 }
 
-function endTimer(id){
-if(!currentStart) return;
-const sec=Math.round((Date.now()-currentStart)/1000);
-data.timing.perQuestion[id]=(data.timing.perQuestion[id]||0)+sec;
-save();
+function radio(key,label){
+  const checked = (data.answers[key] === label) ? "checked" : "";
+  return `
+    <div class="choice">
+      <input type="radio" name="${key}" ${checked} onclick="saveAnswer('${key}','${escapeAttr(label)}')">
+      <div>${escapeText(label)}</div>
+    </div>
+  `;
 }
 
-function render(){
-const q=questions[i];
-document.getElementById("progress").textContent=`Question ${i+1} of ${questions.length}`;
-document.getElementById("nextBtn").textContent=(i===questions.length-1)?"Submit":"Next";
-document.getElementById("content").innerHTML=
-`<h2>${q.title}</h2>
-<div class="instructions">${q.instructions}</div>
-${q.render()}`;
-currentStart=Date.now();
+function showError(msg){
+  const el = document.getElementById("errorBanner");
+  el.style.display = "block";
+  el.textContent = msg;
+}
+function clearError(){
+  const el = document.getElementById("errorBanner");
+  el.style.display = "none";
+  el.textContent = "";
 }
 
 function showSuccess(){
-document.getElementById("card").innerHTML=`
-<div class="success-screen">
-<h2>Assessment Submitted ✓</h2>
-<p>Thank you for completing the assessment.</p>
-<p>We will be in touch if your application progresses to the next stage.</p>
-</div>
-`;
+  document.getElementById("card").innerHTML = `
+    <div class="success-screen">
+      <h2>Assessment Submitted ✓</h2>
+      <p>Thank you for completing the assessment.</p>
+      <p>We will be in touch if your application progresses to the next stage.</p>
+    </div>
+  `;
+}
+
+// ---------------- timing ----------------
+function startTimer(){
+  if(!data.timing.startedAt) data.timing.startedAt = new Date().toISOString();
+  currentStart = Date.now();
+}
+
+function endTimer(id){
+  if(!currentStart) return;
+  const sec = Math.round((Date.now()-currentStart)/1000);
+  data.timing.perQuestion[id] = (data.timing.perQuestion[id]||0) + sec;
+  save();
+}
+
+// ---------------- validation ----------------
+function validateCurrentStep(){
+  clearError();
+
+  // Candidate details required
+  if(questions[i].id === "details"){
+    const nameOk = (data.name||"").trim().length >= 2;
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((data.email||"").trim());
+    if(!nameOk || !emailOk){
+      showError("Please enter your full name and a valid email address to continue.");
+      return false;
+    }
+  }
+  return true;
+}
+
+// ---------------- render / navigation ----------------
+function render(){
+  clearError();
+  const q = questions[i];
+
+  document.getElementById("progress").textContent = `Question ${i+1} of ${questions.length}`;
+  document.getElementById("nextBtn").textContent = (i===questions.length-1) ? "Submit" : "Next";
+
+  document.getElementById("content").innerHTML = `
+    <h2>${q.title}</h2>
+    <div class="instructions">${q.instructions}</div>
+    ${q.render()}
+  `;
+
+  currentStart = Date.now();
+}
+
+async function submitAll(){
+  const btn = document.getElementById("nextBtn");
+  isSubmitting = true;
+
+  btn.disabled = true;
+  btn.innerHTML = `<div class="spinner"></div> Submitting...`;
+
+  data.timing.submittedAt = new Date().toISOString();
+  data.timing.totalSeconds = Math.round(
+    (new Date(data.timing.submittedAt) - new Date(data.timing.startedAt)) / 1000
+  );
+  save();
+
+  try{
+    const res = await fetch(SUBMIT_URL, {
+      method:"POST",
+      body:new URLSearchParams({ payload: JSON.stringify(data) })
+    });
+
+    // Some GAS deployments return text/html; handle both
+    let ok = res.ok;
+    try{
+      const js = await res.clone().json();
+      ok = ok && (js.status ? js.status === "success" : true);
+    }catch(_){ /* ignore */ }
+
+    if(!ok) throw new Error("Non-OK response");
+
+    localStorage.removeItem(storeKey);
+    showSuccess();
+  }catch(err){
+    console.error("Submission failed:", err);
+    isSubmitting = false;
+    btn.disabled = false;
+    btn.textContent = "Submit";
+    showError("Submission failed. Please try again.");
+  }
 }
 
 function next(){
-const btn=document.getElementById("nextBtn");
-const q=questions[i];
+  if(isSubmitting) return;
 
-if(isSubmitting) return;
+  if(!validateCurrentStep()) return;
 
-if(i===0){ startTimer(); }
-else{ endTimer(q.id); }
+  const q = questions[i];
 
-if(i<questions.length-1){
-i++; render();
-return;
-}
+  // Timer starts when user leaves details page (first Next)
+  if(i === 0){
+    startTimer();
+  }else{
+    endTimer(q.id);
+  }
 
-isSubmitting=true;
-btn.disabled=true;
-btn.innerHTML=`<div class="spinner"></div> Submitting...`;
+  if(i < questions.length - 1){
+    i++;
+    render();
+    return;
+  }
 
-data.timing.submittedAt=new Date().toISOString();
-data.timing.totalSeconds=Math.round(
-(new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
-);
-save();
-
-fetch(SUBMIT_URL,{
-method:"POST",
-body:new URLSearchParams({payload:JSON.stringify(data)})
-})
-.then(res=>res.json())
-.then(()=>{
-localStorage.removeItem(storeKey);
-showSuccess();
-})
-.catch(()=>{
-isSubmitting=false;
-btn.disabled=false;
-btn.textContent="Submit";
-alert("Submission failed. Please try again.");
-});
+  // LAST QUESTION: submit with spinner + success screen
+  submitAll();
 }
 
 render();
