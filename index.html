@@ -3,123 +3,81 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My Refund — CSR Candidate Assessment</title>
+<title>My Refund — CSR Assessment</title>
 
 <style>
-:root{
-  --g0:#094B35;
-  --radius:16px;
-}
-
+:root{ --g0:#094B35; }
 *{box-sizing:border-box}
 
 body{
   margin:0;
   font-family:"Okta Neue", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color:#fff;
-  background:
-    url("My Refund-Hero Images-02 (1).jpg")
-    center center / cover
-    no-repeat fixed;
+  background:url("My Refund-Hero Images-02 (1).jpg") center center / cover no-repeat fixed;
 }
 
-/* ================= HEADER ================= */
+.header{ background:var(--g0); padding:16px 24px; }
+.header-inner{ max-width:1400px; margin:0 auto; display:flex; align-items:center; }
+.brand{ display:flex; align-items:center; gap:14px; }
+.brand img{ height:28px }
+.brand-text strong{ font-size:16px; font-weight:900; }
 
-.header{
-  background:var(--g0);
-  padding:16px 24px;
-}
-
-.header-inner{
-  max-width:1400px;
-  margin:0 auto;
-  display:flex;
-  align-items:center;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:14px;
-}
-
-.brand img{height:28px}
-
-.brand-text strong{
-  font-size:16px;
-  font-weight:900;
-}
-
-/* ================= PAGE ================= */
-
-.page{
-  min-height:calc(100vh - 72px);
-  display:flex;
-}
-
-.left{
-  padding:56px;
-  width:100%;
-}
-
-/* ================= WIDGET ================= */
+.page{ min-height:calc(100vh - 72px); display:flex; }
+.left{ padding:56px; width:100%; }
 
 .card{
   background:var(--g0);
   border-radius:18px;
   padding:28px;
-  max-width:720px;
+  max-width:820px;
   box-shadow:0 20px 40px rgba(0,0,0,.35);
 }
 
-.progress{
-  font-size:13px;
-  font-weight:800;
-  opacity:.9;
-  margin-bottom:10px;
-}
+.progress{ font-size:13px; font-weight:800; margin-bottom:12px; }
 
-h2{
-  margin:0 0 6px 0;
-  font-weight:900;
-}
+h2{ margin:0 0 10px 0; font-weight:900; }
 
-.instructions{
-  font-size:14px;
-  opacity:.95;
-  margin-bottom:14px;
-  line-height:1.4;
-}
+.instructions{ font-size:14px; margin-bottom:14px; line-height:1.45; }
 
 blockquote{
   background:rgba(255,255,255,.1);
   padding:14px 16px;
   border-left:4px solid #fff;
-  margin:14px 0;
-  font-size:14px;
+  margin:12px 0;
   white-space:pre-wrap;
 }
 
-textarea,input{
+label{ display:block; margin-top:12px; font-weight:800; font-size:14px; }
+
+textarea,input,select{
   width:100%;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
+  padding:10px;
+  margin-top:8px;
+  border-radius:8px;
   border:none;
   font-family:inherit;
   font-size:14px;
 }
 
-textarea{
-  min-height:160px;
-  resize:vertical;
+textarea{ min-height:120px; }
+
+.choice-group{
+  background:rgba(255,255,255,.08);
+  padding:12px;
+  border-radius:10px;
+  margin-top:8px;
 }
 
-.actions{
+.choice{
   display:flex;
-  justify-content:flex-end;
-  margin-top:18px;
+  align-items:flex-start;
+  gap:10px;
+  margin:6px 0;
 }
+
+.choice input{ width:auto; }
+
+.actions{ display:flex; justify-content:flex-end; margin-top:20px; }
 
 button{
   background:#fff;
@@ -129,13 +87,6 @@ button{
   padding:10px 26px;
   font-weight:900;
   cursor:pointer;
-}
-
-button:hover{opacity:.9}
-
-@media(max-width:900px){
-  .left{padding:32px 20px}
-  body{background-attachment:scroll}
 }
 </style>
 </head>
@@ -147,7 +98,7 @@ button:hover{opacity:.9}
     <div class="brand">
       <img src="logo.png" alt="My Refund">
       <div class="brand-text">
-        <strong>CSR Candidate Assessment</strong>
+        <strong>CSR Assessment</strong>
       </div>
     </div>
   </div>
@@ -167,190 +118,189 @@ button:hover{opacity:.9}
 
 <script>
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec";
-const storeKey = "myrefund_csr_assessment_organic_v1";
+const storeKey = "csr_assessment_structured_v1";
 
-const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
-
-// Identify the test so Apps Script can handle multiple tests in one sheet.
+const data = JSON.parse(localStorage.getItem(storeKey) || {});
 data.testType = "CSR Assessment";
 
 data.answers = data.answers || {};
-data.timing = data.timing || {
-  startedAt:null,
-  submittedAt:null,
-  totalSeconds:0,
-  perQuestion:{}
-};
+data.timing = data.timing || { startedAt:null, submittedAt:null, totalSeconds:0, perQuestion:{} };
 
-let currentStart = null;
+let currentStart=null;
 
-const questions = [
-  {
-    id:"details",
-    title:"Candidate details",
-    instructions:"Please enter your details so we know who this assessment belongs to.",
-    render:()=>`
-      <input placeholder="Full name" value="${escapeAttr(data.name||"")}" oninput="saveField('name',this.value)">
-      <input placeholder="Email address" value="${escapeAttr(data.email||"")}" oninput="saveField('email',this.value)">
-    `
-  },
+const questions=[
 
-  {
-    id:"q1",
-    title:"Customer Email Response",
-    instructions:"Write a professional response that acknowledges the customer’s frustration, takes ownership (without blaming anyone), avoids over-promising, and clearly explains what will happen next.",
-    scenario:"This is the third time I’ve contacted you. I was promised a response and nothing has happened. If this isn’t sorted today, I’ll be making a complaint."
-  },
+{
+id:"details",
+title:"Candidate Details",
+instructions:"Enter your full name and email address.",
+render:()=>`
+<input placeholder="Full name" value="${data.name||""}" oninput="saveField('name',this.value)">
+<input placeholder="Email address" value="${data.email||""}" oninput="saveField('email',this.value)">
+`
+},
 
-  {
-    id:"q2",
-    title:"Prioritisation & Judgement",
-    instructions:"List these in the order you would handle them (1–4), then briefly explain why you chose that order.",
-    scenario:
-`1. A customer says they believe they were charged twice.
-2. A customer is upset about waiting 48 hours for a reply.
-3. A new customer wants help understanding how the process works.
-4. A colleague asks for help with a non-urgent internal task.`
-  },
+{
+id:"s1",
+title:"Section 1: Customer Escalation",
+instructions:"Write a professional response.",
+render:()=>`
+<blockquote>
+“This is the third time I’ve contacted you. I was promised a response and nothing has happened. If this isn’t sorted today, I’ll be making a complaint.”
+</blockquote>
+<textarea oninput="saveAnswer('escalation_response',this.value)">${data.answers.escalation_response||""}</textarea>
+`
+},
 
-  {
-    id:"q3",
-    title:"Handling Required Information",
-    instructions:"Write a professional response that acknowledges the customer’s concern, clearly explains why the information is required, stays calm and respectful, and encourages the customer to continue the process.",
-    scenario:"I don’t feel comfortable providing that information. I’ve already told you what the issue is — can’t you just sort it without it?"
-  },
+{
+id:"s2",
+title:"Section 2: Prioritisation & Judgement",
+instructions:"Assign each task a ranking from 1 (highest priority) to 4 (lowest). Each rank can only be used once.",
+render:()=>`
+${rankTask("task1","Customer believes they were charged twice.")}
+${rankTask("task2","Customer upset about waiting 48 hours.")}
+${rankTask("task3","New customer asking how process works.")}
+${rankTask("task4","Colleague asking for non-urgent help.")}
+<textarea placeholder="Briefly explain your reasoning..." oninput="saveAnswer('priority_explanation',this.value)">${data.answers.priority_explanation||""}</textarea>
+`
+},
 
-  {
-    id:"q4",
-    title:"Explaining a Delay",
-    instructions:"Write a clear and professional response that explains why the request may not be completed immediately, sets realistic expectations, and reassures the customer without making guarantees.",
-    scenario:"I submitted everything yesterday. Why hasn’t this been completed yet?"
-  },
+{
+id:"s3",
+title:"Section 3: Handling Required Information",
+instructions:"Select the most appropriate first step, then write your response.",
+render:()=>`
+<div class="choice-group">
+${radio("info_step","Refuse and restate policy")}
+${radio("info_step","Acknowledge concern and explain why information is required")}
+${radio("info_step","Escalate to manager")}
+${radio("info_step","Close the request")}
+</div>
+<textarea placeholder="Write your professional response..." oninput="saveAnswer('info_response',this.value)">${data.answers.info_response||""}</textarea>
+`
+},
 
-  {
-    id:"q5",
-    title:"Attention to Detail",
-    instructions:"There is an inconsistency in the message below. Identify what the inconsistency is, and briefly explain what you would do next before responding to the customer.",
-    scenario:
-`Hi,
+{
+id:"s4",
+title:"Section 4: Explaining a Delay",
+instructions:"Write a clear and professional response.",
+render:()=>`
+<blockquote>
+“I submitted everything yesterday. Why hasn’t this been completed yet?”
+</blockquote>
+<textarea oninput="saveAnswer('delay_response',this.value)">${data.answers.delay_response||""}</textarea>
+`
+},
 
+{
+id:"s5",
+title:"Section 5: Attention to Detail",
+instructions:"Identify the inconsistency and explain what you would do next.",
+render:()=>`
+<blockquote>
 I was charged $120 on 14 March, but my receipt says $102.
+Please refund the difference of $12.
+</blockquote>
+<textarea placeholder="What is the inconsistency?" oninput="saveAnswer('inconsistency',this.value)">${data.answers.inconsistency||""}</textarea>
+<textarea placeholder="What action would you take before responding?" oninput="saveAnswer('detail_action',this.value)">${data.answers.detail_action||""}</textarea>
+`
+},
 
-My reference number is RF-2046-18-A7.
+{
+id:"s6",
+title:"Section 6: Customer Is Incorrect",
+instructions:"Select the most appropriate tone, then write your response.",
+render:()=>`
+<div class="choice-group">
+${radio("tone","Defensive")}
+${radio("tone","Neutral and factual")}
+${radio("tone","Apologise and refund anyway")}
+${radio("tone","Escalate immediately")}
+</div>
+<textarea placeholder="Write your professional response..." oninput="saveAnswer('incorrect_response',this.value)">${data.answers.incorrect_response||""}</textarea>
+`
+}
 
-Please refund the difference of $12 as soon as possible.
-
-Thanks.`
-  },
-
-  {
-    id:"q6",
-    title:"Responding When the Customer Is Incorrect",
-    instructions:"Write a professional response that corrects the misunderstanding, clearly explains what happened, maintains a respectful tone, and avoids sounding defensive.",
-    scenario:
-`A customer writes:
-
-“I’ve checked my records and you definitely charged me twice. This is clearly a mistake on your end.”
-
-However, after reviewing the account, you can see that the two charges relate to two separate services the customer requested.`
-  }
 ];
 
-let i = 0;
-
-function save(){
-  localStorage.setItem(storeKey, JSON.stringify(data));
+function rankTask(key,label){
+const selected=data.answers[key]||"";
+return `
+<label>${label}</label>
+<select onchange="saveAnswer('${key}',this.value)">
+<option value="">Select rank</option>
+<option ${selected=="1"?"selected":""} value="1">1 (Highest)</option>
+<option ${selected=="2"?"selected":""} value="2">2</option>
+<option ${selected=="3"?"selected":""} value="3">3</option>
+<option ${selected=="4"?"selected":""} value="4">4 (Lowest)</option>
+</select>
+`;
 }
 
-function saveField(k,v){
-  data[k]=v;
-  save();
+function radio(key,label){
+const checked=data.answers[key]==label?"checked":"";
+return `<div class="choice">
+<input type="radio" name="${key}" ${checked} onclick="saveAnswer('${key}','${label}')">
+<div>${label}</div>
+</div>`;
 }
 
-function saveAnswer(k,v){
-  data.answers[k]=v;
-  save();
-}
+let i=0;
+
+function save(){ localStorage.setItem(storeKey,JSON.stringify(data)); }
+function saveField(k,v){ data[k]=v; save(); }
+function saveAnswer(k,v){ data.answers[k]=v; save(); }
 
 function startTimer(){
-  if(!data.timing.startedAt){
-    data.timing.startedAt = new Date().toISOString();
-  }
-  currentStart = Date.now();
+if(!data.timing.startedAt){
+data.timing.startedAt=new Date().toISOString();
+}
+currentStart=Date.now();
 }
 
 function endTimer(id){
-  if(!currentStart) return;
-  const sec = Math.round((Date.now()-currentStart)/1000);
-  data.timing.perQuestion[id] = (data.timing.perQuestion[id]||0) + sec;
-  save();
-}
-
-function escapeAttr(s){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/"/g,"&quot;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+if(!currentStart) return;
+const sec=Math.round((Date.now()-currentStart)/1000);
+data.timing.perQuestion[id]=(data.timing.perQuestion[id]||0)+sec;
+save();
 }
 
 function render(){
-  const q = questions[i];
-
-  document.getElementById("progress").textContent = `Question ${i+1} of ${questions.length}`;
-
-  const btn = document.getElementById("nextBtn");
-  btn.textContent = (i === questions.length-1) ? "Submit" : "Next";
-
-  let html = `<h2>${q.title}</h2>
-              <div class="instructions">${q.instructions}</div>`;
-
-  if(q.scenario){
-    html += `<blockquote>${q.scenario}</blockquote>
-             <textarea placeholder="Write your answer here..." oninput="saveAnswer('${q.id}',this.value)">${data.answers[q.id]||""}</textarea>`;
-  }
-
-  if(q.render) html += q.render();
-
-  document.getElementById("content").innerHTML = html;
-  currentStart = Date.now();
+const q=questions[i];
+document.getElementById("progress").textContent=`Question ${i+1} of ${questions.length}`;
+document.getElementById("nextBtn").textContent=(i===questions.length-1)?"Submit":"Next";
+document.getElementById("content").innerHTML=
+`<h2>${q.title}</h2>
+<div class="instructions">${q.instructions}</div>
+${q.render()}`;
+currentStart=Date.now();
 }
 
 function next(){
-  const q = questions[i];
+const q=questions[i];
 
-  // Start the assessment timer when they move from details -> Q1
-  if(i===0){
-    startTimer();
-  } else {
-    endTimer(q.id);
-  }
+if(i===0){ startTimer(); }
+else{ endTimer(q.id); }
 
-  if(i < questions.length-1){
-    i++;
-    render();
-  } else {
-    data.timing.submittedAt = new Date().toISOString();
-    data.timing.totalSeconds = Math.round(
-      (new Date(data.timing.submittedAt) - new Date(data.timing.startedAt)) / 1000
-    );
-    save();
+if(i<questions.length-1){
+i++; render();
+}else{
+data.timing.submittedAt=new Date().toISOString();
+data.timing.totalSeconds=Math.round(
+(new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
+);
+save();
 
-    fetch(SUBMIT_URL, {
-      method:"POST",
-      body: new URLSearchParams({
-        payload: JSON.stringify(data)
-      })
-    })
-    .then(() => {
-      localStorage.removeItem(storeKey);
-      alert("Assessment submitted successfully. Thank you.");
-    })
-    .catch((error) => {
-      console.error("Submission error:", error);
-      alert("Submission failed. Please try again.");
-    });
-  }
+fetch(SUBMIT_URL,{
+method:"POST",
+body:new URLSearchParams({payload:JSON.stringify(data)})
+})
+.then(()=>{
+localStorage.removeItem(storeKey);
+alert("Assessment submitted successfully.");
+})
+.catch(()=>alert("Submission failed."));
+}
 }
 
 render();
