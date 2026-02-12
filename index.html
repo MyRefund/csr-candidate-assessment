@@ -38,7 +38,7 @@ body{
 
 h2{ margin:0 0 10px 0; font-weight:900; }
 
-.instructions{ font-size:14px; margin-bottom:14px; line-height:1.45; }
+.instructions{ font-size:14px; margin-bottom:14px; line-height:1.45; white-space:pre-line; }
 
 blockquote{
   background:rgba(255,255,255,.1);
@@ -124,9 +124,8 @@ button{
 
 <script>
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec";
-const storeKey = "csr_assessment_structured_v2";
+const storeKey = "csr_assessment_final_v1";
 
-// ✅ IMPORTANT FIX: fallback must be a STRING, not an object
 const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
 
 data.testType = "CSR Assessment";
@@ -136,99 +135,122 @@ data.timing  = data.timing  || { startedAt:null, submittedAt:null, totalSeconds:
 let currentStart = null;
 
 const questions = [
-  {
-    id:"details",
-    title:"Candidate Details",
-    instructions:"Enter your full name and email address.",
-    render:()=>`
-      <input placeholder="Full name" value="${escapeAttr(data.name||"")}" oninput="saveField('name',this.value)">
-      <input placeholder="Email address" value="${escapeAttr(data.email||"")}" oninput="saveField('email',this.value)">
-    `
-  },
 
-  {
-    id:"s1",
-    title:"Section 1: Customer Escalation",
-    instructions:"Write a professional response.",
-    render:()=>`
-      <blockquote>“This is the third time I’ve contacted you. I was promised a response and nothing has happened. If this isn’t sorted today, I’ll be making a complaint.”</blockquote>
-      <textarea oninput="saveAnswer('escalation_response',this.value)">${escapeText(data.answers.escalation_response||"")}</textarea>
-    `
-  },
+{
+id:"details",
+title:"Candidate Details",
+instructions:"Enter your full name and email address.",
+render:()=>`
+<input placeholder="Full name" value="${escapeAttr(data.name||"")}" oninput="saveField('name',this.value)">
+<input placeholder="Email address" value="${escapeAttr(data.email||"")}" oninput="saveField('email',this.value)">
+`
+},
 
-  {
-    id:"s2",
-    title:"Section 2: Prioritisation & Judgement",
-    instructions:"Assign each task a ranking from 1 (highest priority) to 4 (lowest). Each rank should be used once.",
-    render:()=>`
-      ${rankTask("task1","Customer believes they were charged twice.")}
-      ${rankTask("task2","Customer upset about waiting 48 hours for a reply.")}
-      ${rankTask("task3","New customer asking how the process works.")}
-      ${rankTask("task4","Colleague asking for non-urgent internal help.")}
+{
+id:"s1",
+title:"Section 1: Customer Escalation",
+instructions:"Write a professional response.",
+render:()=>`
+<blockquote>
+“This is the third time I’ve contacted you. I was promised a response and nothing has happened. If this isn’t sorted today, I’ll be making a complaint.”
+</blockquote>
+<textarea oninput="saveAnswer('escalation_response',this.value)">${escapeText(data.answers.escalation_response||"")}</textarea>
+`
+},
 
-      <label>Briefly explain your reasoning:</label>
-      <textarea oninput="saveAnswer('priority_explanation',this.value)">${escapeText(data.answers.priority_explanation||"")}</textarea>
-    `
-  },
+{
+id:"s2",
+title:"Section 2: Prioritisation & Judgement",
+instructions:"Assign each task a ranking from 1 (highest priority) to 4 (lowest). Each rank should be used once.",
+render:()=>`
+${rankTask("task1","Customer believes they were charged twice.")}
+${rankTask("task2","Customer upset about waiting 48 hours for a reply.")}
+${rankTask("task3","New customer asking how the process works.")}
+${rankTask("task4","Colleague asking for non-urgent internal help.")}
 
-  {
-    id:"s3",
-    title:"Section 3: Handling Required Information",
-    instructions:"Select the most appropriate first step, then write your response.",
-    render:()=>`
-      <div class="choice-group">
-        ${radio("info_step","Refuse and restate policy")}
-        ${radio("info_step","Acknowledge concern and explain why information is required")}
-        ${radio("info_step","Escalate to manager")}
-        ${radio("info_step","Close the request")}
-      </div>
+<label>Briefly explain your reasoning:</label>
+<textarea oninput="saveAnswer('priority_explanation',this.value)">${escapeText(data.answers.priority_explanation||"")}</textarea>
+`
+},
 
-      <label>Write your professional response:</label>
-      <textarea oninput="saveAnswer('info_response',this.value)">${escapeText(data.answers.info_response||"")}</textarea>
-    `
-  },
+{
+id:"s3",
+title:"Section 3: Handling Required Information",
+instructions:"Select the most appropriate first step, then write your response.",
+render:()=>`
+<div class="choice-group">
+${radio("info_step","Refuse and restate policy")}
+${radio("info_step","Acknowledge concern and explain why information is required")}
+${radio("info_step","Escalate to manager")}
+${radio("info_step","Close the request")}
+</div>
 
-  {
-    id:"s4",
-    title:"Section 4: Explaining a Delay",
-    instructions:"Write a clear and professional response.",
-    render:()=>`
-      <blockquote>“I submitted everything yesterday. Why hasn’t this been completed yet?”</blockquote>
-      <textarea oninput="saveAnswer('delay_response',this.value)">${escapeText(data.answers.delay_response||"")}</textarea>
-    `
-  },
+<label>Write your professional response:</label>
+<textarea oninput="saveAnswer('info_response',this.value)">${escapeText(data.answers.info_response||"")}</textarea>
+`
+},
 
-  {
-    id:"s5",
-    title:"Section 5: Attention to Detail",
-    instructions:"Identify the inconsistency and explain what you would do next.",
-    render:()=>`
-      <blockquote>I was charged $120 on 14 March, but my receipt says $102. Please refund the difference of $12.</blockquote>
+{
+id:"s4",
+title:"Section 4: Managing Expectations & Explaining Delays",
+instructions:`Write a clear and professional response.
 
-      <label>What is the inconsistency?</label>
-      <textarea oninput="saveAnswer('inconsistency',this.value)">${escapeText(data.answers.inconsistency||"")}</textarea>
+Your response should:
+• Acknowledge the customer’s concern  
+• Explain why the request may not be completed immediately  
+• Set realistic expectations  
+• Avoid guaranteeing timeframes  
+• Maintain a calm and confident tone`,
+render:()=>`
+<blockquote>
+Hi,
 
-      <label>What action would you take before responding?</label>
-      <textarea oninput="saveAnswer('detail_action',this.value)">${escapeText(data.answers.detail_action||"")}</textarea>
-    `
-  },
+I uploaded all my documents yesterday and I was expecting this to be finished by now.
 
-  {
-    id:"s6",
-    title:"Section 6: Customer Is Incorrect",
-    instructions:"Select the most appropriate tone, then write your response.",
-    render:()=>`
-      <div class="choice-group">
-        ${radio("tone","Defensive")}
-        ${radio("tone","Neutral and factual")}
-        ${radio("tone","Apologise and refund anyway")}
-        ${radio("tone","Escalate immediately")}
-      </div>
+Can you please explain what is taking so long?
+</blockquote>
 
-      <label>Write your professional response:</label>
-      <textarea oninput="saveAnswer('incorrect_response',this.value)">${escapeText(data.answers.incorrect_response||"")}</textarea>
-    `
-  }
+<textarea oninput="saveAnswer('delay_response',this.value)">${escapeText(data.answers.delay_response||"")}</textarea>
+`
+},
+
+{
+id:"s6",
+title:"Section 6: Responding When the Customer Is Incorrect",
+instructions:`Select the most appropriate tone, then write your response.
+
+Your response should:
+• Acknowledge the customer’s concern  
+• Clearly explain why the outcome occurred  
+• Avoid blaming the customer  
+• Avoid being defensive  
+• Maintain confidence in the calculation  
+• Offer to clarify further if needed`,
+render:()=>`
+<blockquote>
+Hi,
+
+I just received my tax outcome and it says I have to pay $186.
+
+That can’t be right. I always get a refund every year.
+
+You must have made a mistake — please fix this.
+</blockquote>
+
+<div class="choice-group">
+${radio("tone","Defensive")}
+${radio("tone","Neutral and factual")}
+${radio("tone","Apologise and adjust the result")}
+${radio("tone","Escalate immediately")}
+</div>
+
+<label>Write your professional response:</label>
+<textarea oninput="saveAnswer('incorrect_response',this.value)">
+${escapeText(data.answers.incorrect_response||"")}
+</textarea>
+`
+}
+
 ];
 
 let i = 0;
@@ -238,97 +260,81 @@ function saveField(k,v){ data[k]=v; save(); }
 function saveAnswer(k,v){ data.answers[k]=v; save(); }
 
 function escapeAttr(s){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/"/g,"&quot;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 function escapeText(s){
-  return String(s)
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 function rankTask(key,label){
-  const selected = data.answers[key] || "";
-  return `
-    <label>${escapeText(label)}</label>
-    <select onchange="saveAnswer('${key}',this.value)">
-      <option value="">Select rank</option>
-      <option ${selected==="1"?"selected":""} value="1">1 (Highest)</option>
-      <option ${selected==="2"?"selected":""} value="2">2</option>
-      <option ${selected==="3"?"selected":""} value="3">3</option>
-      <option ${selected==="4"?"selected":""} value="4">4 (Lowest)</option>
-    </select>
-  `;
+const selected=data.answers[key]||"";
+return `
+<label>${escapeText(label)}</label>
+<select onchange="saveAnswer('${key}',this.value)">
+<option value="">Select rank</option>
+<option ${selected==="1"?"selected":""} value="1">1 (Highest)</option>
+<option ${selected==="2"?"selected":""} value="2">2</option>
+<option ${selected==="3"?"selected":""} value="3">3</option>
+<option ${selected==="4"?"selected":""} value="4">4 (Lowest)</option>
+</select>`;
 }
 
 function radio(key,label){
-  const checked = (data.answers[key] === label) ? "checked" : "";
-  return `
-    <div class="choice">
-      <input type="radio" name="${key}" ${checked} onclick="saveAnswer('${key}','${escapeAttr(label)}')">
-      <div>${escapeText(label)}</div>
-    </div>
-  `;
+const checked=data.answers[key]===label?"checked":"";
+return `<div class="choice">
+<input type="radio" name="${key}" ${checked} onclick="saveAnswer('${key}','${label}')">
+<div>${label}</div>
+</div>`;
 }
 
 function startTimer(){
-  if(!data.timing.startedAt) data.timing.startedAt = new Date().toISOString();
-  currentStart = Date.now();
+if(!data.timing.startedAt) data.timing.startedAt=new Date().toISOString();
+currentStart=Date.now();
 }
 
 function endTimer(id){
-  if(!currentStart) return;
-  const sec = Math.round((Date.now()-currentStart)/1000);
-  data.timing.perQuestion[id] = (data.timing.perQuestion[id]||0) + sec;
-  save();
+if(!currentStart) return;
+const sec=Math.round((Date.now()-currentStart)/1000);
+data.timing.perQuestion[id]=(data.timing.perQuestion[id]||0)+sec;
+save();
 }
 
 function render(){
-  const q = questions[i];
-  document.getElementById("progress").textContent = `Question ${i+1} of ${questions.length}`;
-  document.getElementById("nextBtn").textContent = (i===questions.length-1) ? "Submit" : "Next";
-  document.getElementById("content").innerHTML = `
-    <h2>${q.title}</h2>
-    <div class="instructions">${q.instructions}</div>
-    ${q.render()}
-  `;
-  currentStart = Date.now();
+const q=questions[i];
+document.getElementById("progress").textContent=`Question ${i+1} of ${questions.length}`;
+document.getElementById("nextBtn").textContent=(i===questions.length-1)?"Submit":"Next";
+document.getElementById("content").innerHTML=
+`<h2>${q.title}</h2>
+<div class="instructions">${q.instructions}</div>
+${q.render()}`;
+currentStart=Date.now();
 }
 
 function next(){
-  const q = questions[i];
+const q=questions[i];
 
-  if(i===0) startTimer();
-  else endTimer(q.id);
+if(i===0){ startTimer(); }
+else{ endTimer(q.id); }
 
-  if(i < questions.length-1){
-    i++;
-    render();
-    return;
-  }
+if(i<questions.length-1){
+i++; render();
+}else{
+data.timing.submittedAt=new Date().toISOString();
+data.timing.totalSeconds=Math.round(
+(new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
+);
+save();
 
-  data.timing.submittedAt = new Date().toISOString();
-  data.timing.totalSeconds = Math.round(
-    (new Date(data.timing.submittedAt) - new Date(data.timing.startedAt)) / 1000
-  );
-  save();
-
-  fetch(SUBMIT_URL, {
-    method:"POST",
-    body:new URLSearchParams({ payload: JSON.stringify(data) })
-  })
-  .then(() => {
-    localStorage.removeItem(storeKey);
-    alert("Assessment submitted successfully.");
-  })
-  .catch((err) => {
-    console.error("Submission failed:", err);
-    alert("Submission failed.");
-  });
+fetch(SUBMIT_URL,{
+method:"POST",
+body:new URLSearchParams({payload:JSON.stringify(data)})
+})
+.then(()=>{
+localStorage.removeItem(storeKey);
+alert("Assessment submitted successfully.");
+})
+.catch(()=>alert("Submission failed."));
+}
 }
 
 render();
