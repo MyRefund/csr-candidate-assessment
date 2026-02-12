@@ -23,6 +23,8 @@ body{
     no-repeat fixed;
 }
 
+/* ================= HEADER ================= */
+
 .header{
   background:var(--g0);
   padding:16px 24px;
@@ -48,6 +50,8 @@ body{
   font-weight:900;
 }
 
+/* ================= PAGE ================= */
+
 .page{
   min-height:calc(100vh - 72px);
   display:flex;
@@ -57,6 +61,8 @@ body{
   padding:56px;
   width:100%;
 }
+
+/* ================= WIDGET ================= */
 
 .card{
   background:var(--g0);
@@ -82,6 +88,7 @@ h2{
   font-size:14px;
   opacity:.95;
   margin-bottom:14px;
+  line-height:1.4;
 }
 
 blockquote{
@@ -90,6 +97,7 @@ blockquote{
   border-left:4px solid #fff;
   margin:14px 0;
   font-size:14px;
+  white-space:pre-wrap;
 }
 
 textarea,input{
@@ -103,7 +111,7 @@ textarea,input{
 }
 
 textarea{
-  min-height:140px;
+  min-height:160px;
   resize:vertical;
 }
 
@@ -151,7 +159,7 @@ button:hover{opacity:.9}
       <div class="progress" id="progress"></div>
       <div id="content"></div>
       <div class="actions">
-        <button onclick="next()">Next</button>
+        <button id="nextBtn" onclick="next()">Next</button>
       </div>
     </div>
   </div>
@@ -159,10 +167,9 @@ button:hover{opacity:.9}
 
 <script>
 const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbzqt1qFnF1Qgff1O7-lWmlSIem5gEcGW8zPRhmUW6HqHtK06bRoABznXuX7EWj7vWfO/exec";
-const storeKey = "myrefund_csr_assessment";
+const storeKey = "myrefund_csr_assessment_organic_v1";
 
 const data = JSON.parse(localStorage.getItem(storeKey) || "{}");
-
 data.answers = data.answers || {};
 data.timing = data.timing || {
   startedAt:null,
@@ -179,56 +186,69 @@ const questions = [
     title:"Candidate details",
     instructions:"Please enter your details so we know who this assessment belongs to.",
     render:()=>`
-      <input placeholder="Full name" value="${data.name||""}" oninput="saveField('name',this.value)">
-      <input placeholder="Email address" value="${data.email||""}" oninput="saveField('email',this.value)">
+      <input placeholder="Full name" value="${escapeAttr(data.name||"")}" oninput="saveField('name',this.value)">
+      <input placeholder="Email address" value="${escapeAttr(data.email||"")}" oninput="saveField('email',this.value)">
     `
   },
+
   {
     id:"q1",
     title:"Customer Email Response",
-    instructions:"Write a professional and empathetic response. Acknowledge the frustration, take ownership, and explain next steps clearly.",
-    scenario:"This is the third time I’ve contacted you and I still don’t have an answer. I was promised a response last week and now I’m being ignored. If this isn’t sorted today, I’ll be taking this further."
+    instructions:"Write a professional response that acknowledges the customer’s frustration, takes ownership (without blaming anyone), avoids over-promising, and clearly explains what will happen next.",
+    scenario:"This is the third time I’ve contacted you. I was promised a response and nothing has happened. If this isn’t sorted today, I’ll be making a complaint."
   },
+
   {
     id:"q2",
-    title:"Prioritisation Scenario",
-    instructions:"List the order you would handle these issues and briefly explain why.",
-    scenario:"1. Angry delayed response\n2. Quick 2-minute question\n3. Non-urgent internal request\n4. Possible double charge"
+    title:"Prioritisation & Judgement",
+    instructions:"List these in the order you would handle them (1–4), then briefly explain why you chose that order.",
+    scenario:
+`1. A customer says they believe they were charged twice.
+2. A customer is upset about waiting 48 hours for a reply.
+3. A new customer wants help understanding how the process works.
+4. A colleague asks for help with a non-urgent internal task.`
   },
+
   {
     id:"q3",
-    title:"Policy & Compliance – Identity Verification",
-    instructions:"Explain how you would respond while following policy and keeping the process moving.",
-    scenario:"I don’t have a passport or driver licence, but I can send my work ID instead."
+    title:"Handling Required Information",
+    instructions:"Write a professional response that acknowledges the customer’s concern, clearly explains why the information is required, stays calm and respectful, and encourages the customer to continue the process.",
+    scenario:"I don’t feel comfortable providing that information. I’ve already told you what the issue is — can’t you just sort it without it?"
   },
+
   {
     id:"q4",
-    title:"Empathy & Tone",
-    instructions:"Write a short response (2–4 sentences).",
-    scenario:"I know this probably isn’t your fault, but this has been incredibly stressful and I’m really disappointed."
+    title:"Explaining a Delay",
+    instructions:"Write a clear and professional response that explains why the request may not be completed immediately, sets realistic expectations, and reassures the customer without making guarantees.",
+    scenario:"I submitted everything yesterday. Why hasn’t this been completed yet?"
   },
+
   {
     id:"q5",
     title:"Attention to Detail",
-    instructions:"Accuracy is important when working with customer tax information. Please copy the details below exactly as shown.",
-    render:()=>`
-      <blockquote>
-        IRD number: <strong>123-456-789</strong><br>
-        Bank account: <strong>12-3456-0789012-00</strong>
-      </blockquote>
-      <input placeholder="Re-enter IRD number exactly as shown"
-        value="${data.answers.q5_ird||""}"
-        oninput="saveAnswer('q5_ird',this.value)">
-      <input placeholder="Re-enter bank account number exactly as shown"
-        value="${data.answers.q5_bank||""}"
-        oninput="saveAnswer('q5_bank',this.value)">
-    `
+    instructions:"There is an inconsistency in the message below. Identify what the inconsistency is, and briefly explain what you would do next before responding to the customer.",
+    scenario:
+`Hi,
+
+I was charged $120 on 14 March, but my receipt says $102.
+
+My reference number is RF-2046-18-A7.
+
+Please refund the difference of $12 as soon as possible.
+
+Thanks.`
   },
+
   {
     id:"q6",
-    title:"Explaining Things Clearly",
-    instructions:"Write a clear, plain-English explanation (3–5 sentences).",
-    scenario:"Why does it take a few days for a tax refund to be processed after submission?"
+    title:"Responding When the Customer Is Incorrect",
+    instructions:"Write a professional response that corrects the misunderstanding, clearly explains what happened, maintains a respectful tone, and avoids sounding defensive.",
+    scenario:
+`A customer writes:
+
+“I’ve checked my records and you definitely charged me twice. This is clearly a mistake on your end.”
+
+However, after reviewing the account, you can see that the two charges relate to two separate services the customer requested.`
   }
 ];
 
@@ -258,26 +278,31 @@ function startTimer(){
 function endTimer(id){
   if(!currentStart) return;
   const sec = Math.round((Date.now()-currentStart)/1000);
-  data.timing.perQuestion[id] =
-    (data.timing.perQuestion[id]||0) + sec;
+  data.timing.perQuestion[id] = (data.timing.perQuestion[id]||0) + sec;
   save();
+}
+
+function escapeAttr(s){
+  return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 function render(){
   const q = questions[i];
-  document.getElementById("progress").textContent =
-    `Question ${i+1} of ${questions.length}`;
+  document.getElementById("progress").textContent = `Question ${i+1} of ${questions.length}`;
+
+  const btn = document.getElementById("nextBtn");
+  btn.textContent = (i === questions.length-1) ? "Submit" : "Next";
 
   let html = `<h2>${q.title}</h2>
               <div class="instructions">${q.instructions}</div>`;
 
   if(q.scenario){
     html += `<blockquote>${q.scenario}</blockquote>
-             <textarea oninput="saveAnswer('${q.id}',this.value)">
-             ${data.answers[q.id]||""}</textarea>`;
+             <textarea placeholder="Write your answer here..." oninput="saveAnswer('${q.id}',this.value)">${data.answers[q.id]||""}</textarea>`;
   }
 
   if(q.render) html += q.render();
+
   document.getElementById("content").innerHTML = html;
   currentStart = Date.now();
 }
@@ -285,6 +310,7 @@ function render(){
 function next(){
   const q = questions[i];
 
+  // Start the timer when they move from details -> Q1
   if(i===0){
     startTimer();
   } else {
@@ -297,25 +323,24 @@ function next(){
   } else {
     data.timing.submittedAt = new Date().toISOString();
     data.timing.totalSeconds = Math.round(
-      (new Date(data.timing.submittedAt)-new Date(data.timing.startedAt))/1000
+      (new Date(data.timing.submittedAt) - new Date(data.timing.startedAt)) / 1000
     );
     save();
 
     fetch(SUBMIT_URL, {
-  method: "POST",
-  body: new URLSearchParams({
-    payload: JSON.stringify(data)
-  })
-})
-.then(() => {
-  localStorage.removeItem(storeKey);
-  alert("Assessment submitted successfully. Thank you.");
-})
-.catch(error => {
-  console.error("Submission error:", error);
-  alert("Submission failed. Please try again.");
-});
-
+      method:"POST",
+      body: new URLSearchParams({
+        payload: JSON.stringify(data)
+      })
+    })
+    .then(() => {
+      localStorage.removeItem(storeKey);
+      alert("Assessment submitted successfully. Thank you.");
+    })
+    .catch((error) => {
+      console.error("Submission error:", error);
+      alert("Submission failed. Please try again.");
+    });
   }
 }
 
